@@ -6,4 +6,11 @@ const db = {};
 db.mongoose = mongoose;
 db.url = dbConfig.url;
 
+db.user = require("./user.model.js")(mongoose);
+db.produk = require("./produk.model.js")(mongoose);
+db.komen = require("./komen.model.js")(mongoose);
+db.postingan = require("./postingan.model.js")(mongoose);
+
+
+
 module.exports = db;
