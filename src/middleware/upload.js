@@ -2,22 +2,21 @@ const util = require("util");
 const multer = require("multer");
 const maxSize = 2 * 1024 * 1024;
 
-// Set destination folder
 let storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, __basedir + "/resources/static/assets/uploads/");
   },
   filename: (req, file, cb) => {
     console.log(file.originalname);
-    cb(null, Date.now() + '-' + file.originalname);
+    cb(file.originalname);
   },
 });
 
-// Set MaxSize of File
-let uploadFile = multer({
+let uploadFiles = multer({
   storage: storage,
   limits: { fileSize: maxSize },
-}).single("file");
+}).array("files", 10); // Mengizinkan hingga 10 file diunggah sekaligus
 
-let uploadFileMiddleware = util.promisify(uploadFile);
-module.exports = uploadFileMiddleware;
+// Promisify the upload middleware
+let uploadFilesMiddleware = util.promisify(uploadFiles);
+module.exports = uploadFilesMiddleware;

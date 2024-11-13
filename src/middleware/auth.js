@@ -15,5 +15,19 @@ const verifyToken = (req, res, next) => {
   }
   return next();
 };
+const getUserName = async (req, res) => {
+  try {
+    // Ambil pengguna berdasarkan ID dari token
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).send("User not found");
 
-module.exports = verifyToken;
+    res.status(200).send({ nama_user: user.nama_user });
+  } catch (error) {
+    res.status(500).send("Error retrieving user data");
+  }
+};
+
+module.exports = {
+  verifyToken,
+  getUserName
+}

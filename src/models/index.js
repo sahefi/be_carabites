@@ -10,6 +10,8 @@ db.user = require("./user.model.js")(mongoose);
 db.produk = require("./produk.model.js")(mongoose);
 db.komen = require("./komen.model.js")(mongoose);
 db.postingan = require("./postingan.model.js")(mongoose);
+db.penggalangan = require("./penggalangan.model.js")(mongoose);
+
 
 
 

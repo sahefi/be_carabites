@@ -1,24 +1,36 @@
+// routes.js
 const express = require("express");
 const router = express.Router();
 
+// const verifyToken = require('../middleware/auth');
+// const getUserName = require('../middleware/auth');
 const authCtrl = require("../controllers/auth.ctrl");
 const uploadCtrl = require("../controllers/upload.ctrl");
 const produkCtrl = require("../controllers/produk.ctrl");
 const komenCtrl = require("../controllers/komen.ctrl");
 const postinganCtrl = require("../controllers/postingan.ctrl");
-
+const penggalanganCtrl = require("../controllers/penggalangan.ctrl");
 
 let routes = (app) => {
+    // Rute yang tidak memerlukan autentikasi
     router.get("/public/upload/:name", uploadCtrl.readImage);
-
-    router.get("/auth", authCtrl.findAll);
     router.post("/auth/register", authCtrl.register);
+    router.post("/auth/login", authCtrl.login);
 
+    // Middleware untuk memverifikasi token dan mendapatkan nama pengguna
+    // router.use(verifyToken);
+    // router.use(getUserName);
+
+    // Rute yang memerlukan autentikasi
+    router.get("/auth", authCtrl.findAll);
+
+    // router.get("/produk/search",  produkCtrl.findByName); // Route baru untuk pencarian berdasarkan nama produk
     router.get("/produk", produkCtrl.findAll);
-    router.get("/produk/:id", produkCtrl.findOne)
+    router.get("/produk/:id", produkCtrl.findOne);
     router.post("/produk", produkCtrl.store);
     router.put("/produk/:id", produkCtrl.update);
     router.delete("/produk/:id", produkCtrl.deleteOne);
+
 
     router.get("/komen", komenCtrl.findAll);
     router.get("/komen/:id", komenCtrl.findOne);
@@ -28,14 +40,12 @@ let routes = (app) => {
 
     router.get("/postingan", postinganCtrl.findAll);
 
-
-
-
-
-
+    router.get("/penggalangan", penggalanganCtrl.findAll);
+    router.post("/penggalangan", penggalanganCtrl.store);
+    router.delete("/penggalangan/:id", penggalanganCtrl.deleteOne);
+    router.put("/penggalangan/:id", penggalanganCtrl.update);
 
     app.use(router);
 };
-
 
 module.exports = routes;

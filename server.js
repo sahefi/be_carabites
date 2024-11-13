@@ -1,47 +1,52 @@
-// require('dotenv').config();
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require("express");
 const cors = require("cors");
 const app = express();
 const initRoutes = require("./src/routes");
 const db = require("./src/models");
 
+
+
+// Set base directory globally
 global.__basedir = __dirname;
+
+// Define CORS options
 var corsOptions = {
-  origin: "http://localhost:8085"
+  origin: process.env.FRONTEND_URL || "http://localhost:5173", // Use environment variable or fallback to default
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
-// parse requests of content-type - application/json
+
+// Parse requests of content-type - application/json
 app.use(express.json());
-// parse requests of content-type - application/x-www-form-urlencoded
+// Parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-// Init DB
+// Init DB connection
+// Init DB connection
 db.mongoose
-  .connect(db.url, {
-  })
+  .connect(db.url)
   .then(() => {
     console.log("Connected to the database!");
   })
-  .catch(err => {
+  .catch((err) => {
     console.log("Cannot connect to the database!", err);
     process.exit();
-});
+  });
 
-// init Routes
+// Initialize Routes
 initRoutes(app);
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+
+// Simple route for testing
+app.get("/api", (req, res) => {
+  res.json({ message: "Welcome to the application." });
 });
 
-
-// set port, listen for requests
+// Set port and start the server
 const PORT = process.env.PORT || 8085;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
-
-
-
-

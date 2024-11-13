@@ -1,15 +1,14 @@
 module.exports = mongoose => {
     const schema = mongoose.Schema(
       {
-        nama_user: String,
+        nama_user: {type: String, default : null},
         email: { type:String, unique:true },
+        no_telp_user: {type: Number, default : null},
+        role: {type: String, enum: ['pengguna', 'mitra', 'lembaga sosial'],
+          default: 'pengguna'},
         password: String,
-        jenis_kelamin : String,
-        tgl_lahir_user : Date,
-        no_telp_user: Number,
-        alamat_user: String,
-        token: String,
-        role: String
+        konfirmasi_password: String,
+        token: {type: String, default : null}
       },
       { timestamps: true }
     );

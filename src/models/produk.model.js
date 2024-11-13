@@ -2,13 +2,17 @@ module.exports = mongoose => {
   const schema = mongoose.Schema(
     {
       nama_produk: String,
-      filename: String,
-      jenis_produk: String,
-      harga: Number,
-      kategori_produk: String,
-      lokasi_produk: String,
       deskripsi_produk: String,
-      id_user: String
+      kategori_produk : String,
+      jumlah_produk : Number,
+      harga: Number,
+      files: String,
+      kota: String,
+      kecamatan: String,
+      kelurahan: String,
+      alamat: String,
+      tanggal_pengambilan : Date,
+      jam: String
     },
     { timestamps: true }
   );
