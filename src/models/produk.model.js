@@ -6,7 +6,7 @@ module.exports = mongoose => {
       kategori_produk : String,
       jumlah_produk : Number,
       harga: Number,
-      files: String,
+      filename: [String],
       kota: String,
       kecamatan: String,
       kelurahan: String,

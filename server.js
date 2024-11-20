@@ -6,6 +6,8 @@ const cors = require("cors");
 const app = express();
 const initRoutes = require("./src/routes");
 const db = require("./src/models");
+const bodyParser = require('body-parser');
+
 
 
 
@@ -21,6 +23,9 @@ var corsOptions = {
 app.use(cors(corsOptions));
 
 // Parse requests of content-type - application/json
+// Set batas ukuran payload menjadi 10MB (sesuaikan dengan kebutuhan Anda)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(express.json());
 // Parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));

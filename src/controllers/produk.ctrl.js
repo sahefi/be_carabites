@@ -21,16 +21,16 @@ const findAll =  (req, res) => {
 
 const store = async (req, res) => {
   try {
-    // Attempt to upload files
+    // Process file uploads
     await uploadFile(req, res);
 
-    // Check if files were uploaded
+    // Check if any files were uploaded
     if (!req.files || req.files.length === 0) {
       return res.status(400).send({ message: "Please upload files!" });
     }
 
-    // Process uploaded files
-    const uploadedFiles = req.files.map(file => file.originalname);
+    // Extract filenames from uploaded files
+    const uploadedFiles = req.files.map((file) => file.originalname);
 
     // Destructure and validate required fields from the request body
     const {
@@ -44,10 +44,23 @@ const store = async (req, res) => {
       kelurahan,
       alamat,
       tanggal_pengambilan,
-      jam
+      jam,
     } = req.body;
 
-    if (!nama_produk || !deskripsi_produk || !kategori_produk || !jumlah_produk || !harga || !kota || !kecamatan || !kelurahan || !alamat || !tanggal_pengambilan || !jam) {
+    // Validate required fields
+    if (
+      !nama_produk ||
+      !deskripsi_produk ||
+      !kategori_produk ||
+      !jumlah_produk ||
+      !harga ||
+      !kota ||
+      !kecamatan ||
+      !kelurahan ||
+      !alamat ||
+      !tanggal_pengambilan ||
+      !jam
+    ) {
       return res.status(400).send({ message: "All fields are required!" });
     }
 
@@ -56,30 +69,36 @@ const store = async (req, res) => {
       nama_produk,
       deskripsi_produk,
       kategori_produk,
-      jumlah_produk,
-      harga,
-      filename: uploadedFiles, // Simpan nama file yang diunggah sebagai array
+      jumlah_produk: parseInt(jumlah_produk, 10),
+      harga: parseFloat(harga),
+      filename: uploadedFiles, // Attach filenames
       kota,
       kecamatan,
       kelurahan,
       alamat,
       tanggal_pengambilan: new Date(tanggal_pengambilan),
-      jam
+      jam,
     });
 
     // Save the product to the database
-    await produk.save();
+    const data = await produk.save();
 
+    // Respond with success, including filenames in the response
     res.status(200).send({
       message: "Files and product information uploaded successfully!",
-      data: produk
+      data: data,
     });
   } catch (err) {
+    console.error("Error in store function:", err);
+
+    // Respond with error
     res.status(500).send({
-      message: `Could not upload the files: ${err}`,
+      message: `Could not upload the files: ${err.message || "Internal server error."}`,
     });
   }
 };
+
+
 
   const findOne = async (req, res) => {
     try {

@@ -1,18 +1,13 @@
 module.exports = mongoose => {
     const schema = mongoose.Schema(
     {
-    id_lembaga: String,
     namaGalangDana: String,
-    konten_galang_dana: String,
-    filename: String,
-    target_galang_dana :Number,
-    statusGalangDana: { 
-    type: String, 
-    enum: ['pending', 'ongoing', 'completed', 'canceled'],
-    default: 'pending'
-    },
+    deskripsi: String,
+    kategori: String,
+    target : Number,
     tanggalMulai: { type: Date, required: true },
-    tanggalAkhir: { type: Date, required: true }
+    tanggalAkhir: { type: Date, required: true },
+    filename: [String]
 }, {
     timestamps: true
 });

@@ -4,6 +4,7 @@ const db = require("../models");
 const User = db.user;
 
 
+
 const register = async (req, res) => {
   try {
     const { 
@@ -28,10 +29,8 @@ const register = async (req, res) => {
       return res.status(400).send({ message: "udah punya akun gitu bang" });
     }
 
-    // Encrypt the password
     const encryptedPassword = await bcrypt.hash(password, 10);
     
-    // Create a new user instance
     const user = new User({
       nama_user: nama_user || null,
       email,
@@ -41,7 +40,6 @@ const register = async (req, res) => {
       token: null
     });
 
-    // Generate token after user is defined
     const token = jwt.sign(
       { user_id: user._id, email },
       process.env.TOKEN_KEY,
@@ -49,7 +47,6 @@ const register = async (req, res) => {
     );
     user.token = token;
 
-    // Save the user to the database
     const savedUser = await user.save();
     res.status(201).json(savedUser);
 
@@ -76,31 +73,26 @@ const findAll =  (req, res) => {
     try {
       const { email, password } = req.body;
   
-      // Check if email and password are provided
       if (!email || !password) {
         return res.status(400).send({ message: "Email and password are required" });
       }
   
-      // Find the user by email
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }
   
-      // Compare the password with the hashed password in the database
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(401).send({ message: "Invalid password" });
       }
   
-      // Generate a JWT token
       const token = jwt.sign(
         { user_id: user._id, email: user.email },
         process.env.TOKEN_KEY,
         { expiresIn: "2h" }
       );
   
-      // Send the user and token back in the response
       res.status(200).json({
         user: {
           id: user._id,

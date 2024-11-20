@@ -10,6 +10,8 @@ const produkCtrl = require("../controllers/produk.ctrl");
 const komenCtrl = require("../controllers/komen.ctrl");
 const postinganCtrl = require("../controllers/postingan.ctrl");
 const penggalanganCtrl = require("../controllers/penggalangan.ctrl");
+const transaksiCtrl = require("../controllers/transaksi.ctrl");
+
 
 let routes = (app) => {
     // Rute yang tidak memerlukan autentikasi
@@ -39,11 +41,16 @@ let routes = (app) => {
     router.delete("/komen/:id", komenCtrl.deleteOne);
 
     router.get("/postingan", postinganCtrl.findAll);
+    router.post("/postingan", postinganCtrl.store);
 
     router.get("/penggalangan", penggalanganCtrl.findAll);
     router.post("/penggalangan", penggalanganCtrl.store);
     router.delete("/penggalangan/:id", penggalanganCtrl.deleteOne);
     router.put("/penggalangan/:id", penggalanganCtrl.update);
+
+    router.get("/transaksi", transaksiCtrl.findAll);
+    router.post("/transaksi", transaksiCtrl.store);
+
 
     app.use(router);
 };
