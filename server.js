@@ -3,54 +3,54 @@ require('dotenv').config();
 
 const express = require("express");
 const cors = require("cors");
-const app = express();
-const initRoutes = require("./src/routes");
-const db = require("./src/models");
+const path = require("path");
 const bodyParser = require('body-parser');
+const db = require("./src/models");
+const initRoutes = require("./src/routes");
 
-
-
+const app = express();
 
 // Set base directory globally
 global.__basedir = __dirname;
 
 // Define CORS options
-var corsOptions = {
+const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:5173", // Use environment variable or fallback to default
 };
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
-// Parse requests of content-type - application/json
-// Set batas ukuran payload menjadi 10MB (sesuaikan dengan kebutuhan Anda)
+// Set payload size limits for JSON and URL-encoded data
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-app.use(express.json());
-// Parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
 
-// Init DB connection
-// Init DB connection
+// Serve static files for uploaded images
+app.use(
+  "/resources/uploads/images",
+  express.static(path.join(__dirname, "resources/upload/images"))
+);
+
+// Connect to the database
 db.mongoose
-  .connect(db.url)
+  .connect(db.url, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Connected to the database!");
   })
   .catch((err) => {
-    console.log("Cannot connect to the database!", err);
+    console.error("Cannot connect to the database!", err);
     process.exit();
   });
 
-// Initialize Routes
+// Initialize routes
 initRoutes(app);
 
-// Simple route for testing
+// Simple test route
 app.get("/api", (req, res) => {
   res.json({ message: "Welcome to the application." });
 });
 
-// Set port and start the server
+// Set the port and start the server
 const PORT = process.env.PORT || 8085;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);

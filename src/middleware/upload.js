@@ -6,32 +6,32 @@ const path = require("path");
 // Maximum file size: 2MB
 const maxSize = 2 * 1024 * 1024;
 
-// Define the upload directory
-const uploadDir = path.join(__dirname, "/resources/static/assets/uploads/");
+// Define the base directory dynamically
+const baseDir = path.resolve("C:/RSI/careBites/resources/upload/images");
 
 // Ensure the upload directory exists
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+if (!fs.existsSync(baseDir)) {
+  fs.mkdirSync(baseDir, { recursive: true });
 }
 
 // Configure multer storage
-let storage = multer.diskStorage({
+const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); // Use the validated upload directory
+    cb(null, baseDir); // Use the validated upload directory
   },
   filename: (req, file, cb) => {
     console.log(`Uploading file: ${file.originalname}`);
-    cb(null, `${Date.now()}-${file.originalname}`); // Add a timestamp to avoid overwriting
+    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`); // Add timestamp, sanitize filename
   },
 });
 
 // Multer middleware configuration
-let uploadFiles = multer({
+const uploadFiles = multer({
   storage: storage,
   limits: { fileSize: maxSize }, // Limit file size to 2MB
 }).array("files", 10); // Allow up to 10 files with the field name "files"
 
 // Promisify the upload middleware
-let uploadFilesMiddleware = util.promisify(uploadFiles);
+const uploadFilesMiddleware = util.promisify(uploadFiles);
 
 module.exports = uploadFilesMiddleware;
