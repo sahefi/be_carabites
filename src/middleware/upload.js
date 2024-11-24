@@ -6,22 +6,14 @@ const path = require("path");
 // Maximum file size: 2MB
 const maxSize = 2 * 1024 * 1024;
 
-// Define the base directory dynamically
-const baseDir = path.resolve("C:/RSI/careBites/resources/upload/images");
-
-// Ensure the upload directory exists
-if (!fs.existsSync(baseDir)) {
-  fs.mkdirSync(baseDir, { recursive: true });
-}
-
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, baseDir); // Use the validated upload directory
+    cb(null, "./public/uploads"); // Use the validated upload directory
   },
   filename: (req, file, cb) => {
     console.log(`Uploading file: ${file.originalname}`);
-    cb(null, `${Date.now()}-${file.originalname.replace(/\s+/g, "_")}`); // Add timestamp, sanitize filename
+    cb(null, `${file.originalname.replace(/\s+/g, "_")}`); // Add timestamp, sanitize filename
   },
 });
 

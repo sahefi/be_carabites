@@ -15,9 +15,15 @@ const register = async (req, res) => {
       no_telp_user, 
       role 
     } = req.body;
-
+    console.log(email);
+    console.log(password);
+    console.log(konfirmasi_password);
+    
+    
+    
+    
     if (!email || !password || !konfirmasi_password) {
-      return res.status(400).send({ message: "Input semua dong bang" });
+      return res.status(400).send({ message: "All Field Required" });
     }
 
     if (password !== konfirmasi_password) {
@@ -26,7 +32,7 @@ const register = async (req, res) => {
 
     const oldUser = await User.findOne({ email });
     if (oldUser) {
-      return res.status(400).send({ message: "udah punya akun gitu bang" });
+      return res.status(400).send({ message: "Already Registered" });
     }
 
     const encryptedPassword = await bcrypt.hash(password, 10);

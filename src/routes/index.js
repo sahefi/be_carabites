@@ -41,6 +41,7 @@ let routes = (app) => {
     router.delete("/komen/:id", komenCtrl.deleteOne);
 
     router.get("/postingan", postinganCtrl.findAll);
+    router.get("/postingan/:id", postinganCtrl.findOne);
     router.post("/postingan", postinganCtrl.store);
 
     router.get("/penggalangan", penggalanganCtrl.findAll);

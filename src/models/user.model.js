@@ -8,7 +8,8 @@ module.exports = mongoose => {
           default: 'pengguna'},
         password: String,
         konfirmasi_password: String,
-        token: {type: String, default : null}
+        token: {type: String, default : null},
+        avatar: { type: String, default: null }
       },
       { timestamps: true }
     );

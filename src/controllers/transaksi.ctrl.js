@@ -28,7 +28,8 @@ const store = async (req, res) => {
       jumlah_produk,
       nomor_invoice,
     } = req.body;
-
+    console.log(req.body);
+    
     // Validate required fields
     if (!id_user || !id_produk || !metode_pembayaran || !jumlah_produk || !nomor_invoice) {
       return res.status(400).send({ message: "All fields are required!" });

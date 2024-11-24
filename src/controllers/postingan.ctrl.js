@@ -3,19 +3,28 @@ const Postingan = db.postingan;
 
 const fs = require('fs');
 const uploadFile = require("../middleware/upload");
-const baseUrl = "http://localhost:4001/public/upload/";
+
 
 const findAll = (req, res) => {
-    Postingan.find()
-      .then(data => {
-        res.send(data);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message: err.message || "Some error occurred while retrieving posts."
-        });
+  const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
+  Postingan.find()
+    .populate('id_user', 'nama_user avatar') // Mem-populasi id_user dan memilih field nama_user dan avatar
+    .then(data => {
+      // Tambahkan baseUrl ke filename pada setiap postingan
+      const updatedData = data.map(post => {
+        post.filename = post.filename.map(file => baseUrl + file); // Menggabungkan baseUrl dengan filename
+        return post;
       });
-}
+      
+      res.send(updatedData); // Kirim data yang sudah dimodifikasi
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving posts."
+      });
+    });
+};
+
 
 const store = async (req, res) => {
   try {
@@ -27,7 +36,7 @@ const store = async (req, res) => {
 
     const uploadedFiles = req.files.map((file) => file.originalname);
 
-    const { judul, konten, kategori } = req.body;
+    const { judul, konten, kategori, id_user } = req.body;
 
     // Validate required fields
     if (!judul || !konten) {
@@ -35,7 +44,11 @@ const store = async (req, res) => {
     }
 
     // Validate the `kategori` field
-    const allowedCategories = ["amal", "pendidikan", "kesehatan"];
+    const allowedCategories = ['Technology',
+        'Health',
+        'Business',
+        'Lifestyle',
+        'Education'];
     if (kategori && !allowedCategories.includes(kategori)) {
       return res.status(400).send({
         message: `Invalid category. Allowed values are: ${allowedCategories.join(", ")}`,
@@ -48,6 +61,7 @@ const store = async (req, res) => {
       konten,
       filename: uploadedFiles, // Array of uploaded file names
       kategori: kategori || "amal", // Default to "amal" if no category is provided
+      id_user,
     });
 
     const data = await postingan.save();
@@ -65,8 +79,34 @@ const store = async (req, res) => {
   }
 };
 
+const findOne = (req, res) => {
+  const { id } = req.params; // Mengambil ID dari parameter URL
+
+  const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
+
+  Postingan.findById(id)
+    .populate('id_user', 'nama_user avatar') // Mem-populasi id_user dan memilih field nama_user dan avatar
+    .then(post => {
+      if (!post) {
+        return res.status(404).send({
+          message: "Post not found with id " + id,
+        });
+      }
+
+      // Menambahkan baseUrl ke filename
+      post.filename = post.filename.map(file => baseUrl + file); // Menggabungkan baseUrl dengan filename
+      
+      res.send(post); // Mengirimkan data postingan
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving the post.",
+      });
+    });
+};
 
 module.exports = {
     findAll,
-    store
+    store,
+    findOne
 };
