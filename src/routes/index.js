@@ -11,6 +11,8 @@ const komenCtrl = require("../controllers/komen.ctrl");
 const postinganCtrl = require("../controllers/postingan.ctrl");
 const penggalanganCtrl = require("../controllers/penggalangan.ctrl");
 const transaksiCtrl = require("../controllers/transaksi.ctrl");
+const userCtrl = require("../controllers/user.ctrl");
+const transaksiPCtrl = require("../controllers/transaksi_p.ctrl");
 
 
 let routes = (app) => {
@@ -33,6 +35,12 @@ let routes = (app) => {
     router.put("/produk/:id", produkCtrl.update);
     router.delete("/produk/:id", produkCtrl.deleteOne);
 
+    router.get("/user", userCtrl.findAll);
+    router.get("/user/:id", userCtrl.findOne);
+    router.post("/user", userCtrl.store);
+    router.put("/user/:id", userCtrl.update);
+    router.delete("/user/:id", produkCtrl.deleteOne);
+
 
     router.get("/komen", komenCtrl.findAll);
     router.get("/komen/:id", komenCtrl.findOne);
@@ -45,12 +53,19 @@ let routes = (app) => {
     router.post("/postingan", postinganCtrl.store);
 
     router.get("/penggalangan", penggalanganCtrl.findAll);
+    router.get("/penggalangan/:id", penggalanganCtrl.findOne);
     router.post("/penggalangan", penggalanganCtrl.store);
     router.delete("/penggalangan/:id", penggalanganCtrl.deleteOne);
     router.put("/penggalangan/:id", penggalanganCtrl.update);
 
     router.get("/transaksi", transaksiCtrl.findAll);
     router.post("/transaksi", transaksiCtrl.store);
+    router.get("/count/:id", transaksiCtrl.countTotalHarga);
+
+    router.get("/transaksi-p", transaksiPCtrl.findAll);    
+    router.post("/transaksi-p", transaksiPCtrl.store);
+    router.delete("/transaksi-p/:id", transaksiPCtrl.deleteOne);
+    router.put("/transaksi-p/:id", transaksiPCtrl.update);
 
 
     app.use(router);

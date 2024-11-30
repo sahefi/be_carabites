@@ -15,9 +15,7 @@ const register = async (req, res) => {
       no_telp_user, 
       role 
     } = req.body;
-    console.log(email);
-    console.log(password);
-    console.log(konfirmasi_password);
+
     
     
     
@@ -99,12 +97,18 @@ const findAll =  (req, res) => {
         { expiresIn: "2h" }
       );
   
+      const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
       res.status(200).json({
         user: {
           id: user._id,
           nama_user: user.nama_user,
           email: user.email,
           role: user.role,
+          no_telp_user: user.no_telp_user,
+          avatar : `${baseUrl}${user.avatar}`,   
+          no_rek:user.no_rek,
+          deskripsi:user.deskripsi,
+          alamat:user.alamat          
         },
         token
       });

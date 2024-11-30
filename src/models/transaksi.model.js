@@ -8,16 +8,20 @@ module.exports = mongoose => {
         metode_pembayaran: String,
         jumlah_produk: Number,
         nomor_invoice : String,
-        harga: Number
+        total_harga : String,
     },
       { timestamps: true }
     );
   
     schema.method("toJSON", function() {
-      const { __v, _id,id_user,id_produk, ...object } = this.toObject();
+      const { __v, _id, id_user ,id_produk, ...object } = this.toObject();
       object.id = _id;
+      object.id_user = object.id_user;
       object.user = id_user;    
       object.produk = id_produk;    
+      const baseUrl = 'http://localhost:8085/resources/uploads/';
+      object.user.avatar = id_user.avatar ? `${baseUrl}${id_user.avatar}` : nulll;
+      object.produk.filename = id_produk.filename ? id_produk.filename.map(file => `${baseUrl}${file}`) : [];
       return object;
     });
   

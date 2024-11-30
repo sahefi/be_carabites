@@ -12,6 +12,7 @@ db.komen = require("./komen.model.js")(mongoose);
 db.postingan = require("./postingan.model.js")(mongoose);
 db.penggalangan = require("./penggalangan.model.js")(mongoose);
 db.transaksi = require("./transaksi.model.js")(mongoose);
+db.transaksi_p = require("./transaksi_p.js")(mongoose);
 
 
 

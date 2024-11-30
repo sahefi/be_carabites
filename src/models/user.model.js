@@ -9,7 +9,10 @@ module.exports = mongoose => {
         password: String,
         konfirmasi_password: String,
         token: {type: String, default : null},
-        avatar: { type: String, default: null }
+        avatar: { type: String, default: null },
+        alamat: { type: String, default: null },
+        no_rek: { type: String, default: null },
+        deskripsi: { type: String, default: null }
       },
       { timestamps: true }
     );
@@ -17,6 +20,10 @@ module.exports = mongoose => {
     schema.method("toJSON", function() {
       const { __v, _id, ...object } = this.toObject();
       object.id = _id;
+      const baseUrl = 'http://localhost:8085/resources/uploads/'; // Replace with your actual base URL
+      if (object.avatar) {
+        object.avatar = `${baseUrl}${object.avatar}`;
+      }
       return object;
     });
   

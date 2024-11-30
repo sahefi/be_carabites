@@ -8,7 +8,7 @@ const uploadFile = require("../middleware/upload");
 const findAll = (req, res) => {
   const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
   Postingan.find()
-    .populate('id_user', 'nama_user avatar') // Mem-populasi id_user dan memilih field nama_user dan avatar
+    .populate('id_user') // Mem-populasi id_user dan memilih field nama_user dan avatar
     .then(data => {
       // Tambahkan baseUrl ke filename pada setiap postingan
       const updatedData = data.map(post => {

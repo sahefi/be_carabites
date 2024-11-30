@@ -1,6 +1,5 @@
 const db = require("../models");
-const Transaksi = db.transaksi;
-const Produk = db.produk; 
+const Transaksi = db.transaksi_p;
 
 // Find all records
 const findAll = (req, res) => {
@@ -46,7 +45,7 @@ const store = async (req, res) => {
 
       const total_harga = product.harga * parseInt(jumlah_produk);
 
-      const transaksi = new Transaksi({
+      const transaksi_p = new Transaksi({
         id_user,
         id_produk,
         metode_pembayaran,
@@ -55,7 +54,7 @@ const store = async (req, res) => {
         nomor_invoice,
       });
 
-      const savedTransaction = await transaksi.save();
+      const savedTransaction = await transaksi_p.save();
       createdTransactions.push(savedTransaction);
     }
 
@@ -98,9 +97,9 @@ const update = async (req, res) => {
     }
 
     const id = req.params.id;
-    const transaksi = await Transaksi.findById(id);
+    const transaksi_p = await Transaksi.findById(id);
 
-    if (!transaksi) {
+    if (!transaksi_p) {
       return res.status(404).send({ message: `Transaction with id=${id} not found.` });
     }
 
@@ -115,14 +114,14 @@ const update = async (req, res) => {
     const total_harga = product.harga * parseInt(jumlah_produk);
 
     
-    transaksi.id_user = id_user;
-    transaksi.id_produk = id_produk;
-    transaksi.metode_pembayaran = metode_pembayaran;
-    transaksi.jumlah_produk = parseInt(jumlah_produk);
-    transaksi.total_harga = total_harga;
-    transaksi.nomor_invoice = nomor_invoice;
+    transaksi_p.id_user = id_user;
+    transaksi_p.id_produk = id_produk;
+    transaksi_p.metode_pembayaran = metode_pembayaran;
+    transaksi_p.jumlah_produk = parseInt(jumlah_produk);
+    transaksi_p.total_harga = total_harga;
+    transaksi_p.nomor_invoice = nomor_invoice;
 
-    const updatedData = await transaksi.save();
+    const updatedData = await transaksi_p.save();
     res.send({
       message: "Transaction updated successfully",
       data: updatedData,
@@ -137,9 +136,9 @@ const update = async (req, res) => {
 const deleteOne = async (req, res) => {
   try {
     const id = req.params.id;
-    const transaksi = await Transaksi.findById(id);
+    const transaksi_p = await Transaksi.findById(id);
 
-    if (!transaksi) {
+    if (!transaksi_p) {
       return res.status(404).send({ message: `Transaction with id=${id} not found.` });
     }
 

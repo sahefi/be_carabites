@@ -19,8 +19,10 @@ module.exports = mongoose => {
     const { __v, _id, id_user, ...object } = this.toObject();
 
     // Add `id` and populate user details
+    const baseUrl = 'http://localhost:8085/resources/uploads/';
     object.id = _id;
     object.user = id_user;    
+    object.user.avatar = `${baseUrl}${id_user.avatar}` ?? null;
     return object;
   });
 

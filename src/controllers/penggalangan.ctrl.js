@@ -2,19 +2,32 @@ const db = require("../models");
 const Penggalangan = db.penggalangan;
 const fs = require("fs");
 const uploadFile = require("../middleware/upload");
+const { isSet } = require("util/types");
 
-// Find all records
 const findAll = (req, res) => {
+  // Base URL for accessing uploaded images
+  const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
+
   Penggalangan.find()
-    .then((data) => {
-      res.send(data);
+    .populate('id_user')  
+    .then(data => {
+      // Map through the data to include full URL for filenames
+      const transformedData = data.map(item => ({
+        ...item._doc, // Include original product data
+        filename: item.filename.map(file => `${baseUrl}${file}`), // Construct full URL for each file
+        user: item.id_user, 
+      }));
+
+      res.send(transformedData); // Send transformed data
     })
-    .catch((err) => {
+    .catch(err => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving data.",
+        message:
+          err.message || "Some error occurred while retrieving products."
       });
     });
 };
+
 
 // Store a new record
 const store = async (req, res) => {
@@ -32,8 +45,10 @@ const store = async (req, res) => {
       deskripsi,
       kategori,
       target,
+      lokasi,
       tanggalMulai,
-      tanggalAkhir,
+      tanggalAkhir,   
+      id_user,   
     } = req.body;
 
     if (
@@ -42,7 +57,9 @@ const store = async (req, res) => {
       !kategori ||
       !target ||
       !tanggalMulai ||
-      !tanggalAkhir
+      !tanggalAkhir ||
+      !lokasi ||
+      !id_user
     ) {
       return res.status(400).send({ message: "All fields are required!" });
     }
@@ -55,6 +72,8 @@ const store = async (req, res) => {
       filename: filenames, // Save filenames as an array
       tanggalMulai,
       tanggalAkhir,
+      lokasi,
+      id_user
     });
 
     const data = await penggalangan.save();
@@ -106,8 +125,10 @@ const update = async (req, res) => {
       deskripsi,
       kategori,
       target,
+      lokasi,
       tanggalMulai,
-      tanggalAkhir,
+      tanggalAkhir,   
+      id_user,   
     } = req.body;
 
     if (
@@ -116,7 +137,9 @@ const update = async (req, res) => {
       !kategori ||
       !target ||
       !tanggalMulai ||
-      !tanggalAkhir
+      !tanggalAkhir ||
+      !lokasi ||
+      !id_user
     ) {
       return res.status(400).send({ message: "All fields are required!" });
     }
@@ -128,7 +151,11 @@ const update = async (req, res) => {
       return res.status(404).send({ message: `Data with id=${id} not found.` });
     }
 
-    const newFilenames = req.files.map((file) => file.originalname);
+    if (req.files.length > 0) {             
+      const newFilenames = req.files.map((file) => file.originalname);    
+      penggalangan.filename = newFilenames; // Save new filenames  
+    }
+
 
     // Delete old files from the filesystem
     penggalangan.filename.forEach((file) => {
@@ -143,9 +170,11 @@ const update = async (req, res) => {
     penggalangan.deskripsi = deskripsi;
     penggalangan.kategori = kategori;
     penggalangan.target = parseFloat(target);
-    penggalangan.filename = newFilenames; // Save new filenames
     penggalangan.tanggalMulai = tanggalMulai;
     penggalangan.tanggalAkhir = tanggalAkhir;
+    penggalangan.lokasi = lokasi,
+    penggalangan.id_user = id_user
+
 
     const updatedData = await penggalangan.save();
     res.send(updatedData);
@@ -155,8 +184,40 @@ const update = async (req, res) => {
   }
 };
 
+const findOne = async (req, res) => {
+  try {
+    const id = req.params.id;    
+    const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
+    
+    const produk = await Penggalangan.findById(id).populate('id_user');
+
+    if (!produk) {
+      return res.status(404).send({
+        message: `Product with id ${id} not found.`,
+      });
+    }
+    
+    if (produk.filename && Array.isArray(produk.filename)) {
+      produk.filename = produk.filename.map(file => `${baseUrl}${file}`);
+    }
+    
+    const response = {
+    ...produk._doc, 
+    user: produk.id_user, 
+    };
+
+    res.status(200).send(response);
+  } catch (err) {
+    console.error("Error retrieving product:", err);
+    res.status(500).send({
+      message: `Error retrieving product with id ${req.params.id}.`,
+    });
+  }
+};
+
 module.exports = {
   findAll,
+  findOne,
   store,
   deleteOne,
   update,
