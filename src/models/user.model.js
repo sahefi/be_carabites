@@ -12,7 +12,12 @@ module.exports = mongoose => {
         avatar: { type: String, default: null },
         alamat: { type: String, default: null },
         no_rek: { type: String, default: null },
-        deskripsi: { type: String, default: null }
+        deskripsi: { type: String, default: null },
+        is_verif: {
+          type: String,
+          enum: ['0', '1', '2'], 
+          default: '0', 
+        },
       },
       { timestamps: true }
     );

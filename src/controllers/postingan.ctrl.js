@@ -105,8 +105,35 @@ const findOne = (req, res) => {
     });
 };
 
+const updateVerif = async (req, res) => {
+  try {
+    const { id, is_verif } = req.body; 
+    if (!['0', '1', '2'].includes(is_verif)) {
+      return res.status(400).send({ message: "Invalid value for is_verif. It must be '0', '1', or '2'." });
+    }
+    const postingan = await Postingan.findById(id);
+
+    if (!postingan) {
+      return res.status(404).send({ message: `Postingan with id=${id} not found.` });
+    }
+    postingan.is_verif = is_verif;    
+    const updatedPostingan = await postingan.save();    
+    res.status(200).send({
+      message: "Postingan verification status updated successfully!",
+      data: updatedPostingan
+    });
+
+  } catch (err) {
+    console.error("Error updating verification status:", err);
+    res.status(500).send({
+      message: `Error updating verification status for postingan with id=${req.body.id}.`
+    });
+  }
+};
+
 module.exports = {
     findAll,
     store,
-    findOne
+    findOne,
+    updateVerif
 };

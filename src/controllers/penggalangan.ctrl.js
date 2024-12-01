@@ -2,28 +2,26 @@ const db = require("../models");
 const Penggalangan = db.penggalangan;
 const fs = require("fs");
 const uploadFile = require("../middleware/upload");
-const { isSet } = require("util/types");
 
 const findAll = (req, res) => {
-  // Base URL for accessing uploaded images
   const baseUrl = `${req.protocol}://${req.get("host")}/resources/uploads/`;
 
   Penggalangan.find()
-    .populate('id_user')  
+    .populate('id_user')
+    .populate('transaksi')
     .then(data => {
-      // Map through the data to include full URL for filenames
       const transformedData = data.map(item => ({
-        ...item._doc, // Include original product data
-        filename: item.filename.map(file => `${baseUrl}${file}`), // Construct full URL for each file
-        user: item.id_user, 
+        ...item._doc,
+        filename: item.filename.map(file => `${baseUrl}${file}`), // Transform file paths
+        user: item.id_user, // Include user data
+        transaksi: item.transaksi, // Include array of penggalangan
       }));
 
-      res.send(transformedData); // Send transformed data
+      res.send(transformedData);
     })
     .catch(err => {
       res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving products."
+        message: err.message || "Some error occurred while retrieving penggalangan.",
       });
     });
 };
@@ -215,10 +213,68 @@ const findOne = async (req, res) => {
   }
 };
 
+const counTotal = async (req, res) => {
+  try {
+    const id_user = req.params.id;
+    const currentDate = new Date();
+    
+    
+    const penggalangan = await Penggalangan.find({id_user:id_user})            
+    
+    if (penggalangan.length === 0) {
+      return res.status(404).send({ message: `No penggalangan found for user with id=${id_user}` });
+    }
+    
+    const totalActive = penggalangan.filter(transaction => {      
+      return transaction.status === 'active';
+    });
+    
+    totalPenggalangan = penggalangan.length || 0;
+    totalPenggalanganActive = totalActive.length || 0;
+    res.status(200).send({
+      totalPenggalangan,   
+      totalPenggalanganActive,             
+    });
+  } catch (err) {
+    console.error("Error counting total price:", err);
+    res.status(500).send({
+      message: "Error occurred while calculating the total price.",
+    });
+  }
+};
+
+const updateVerif = async (req, res) => {
+  try {
+    const { id, is_verif } = req.body; 
+    if (!['0', '1', '2'].includes(is_verif)) {
+      return res.status(400).send({ message: "Invalid value for is_verif. It must be '0', '1', or '2'." });
+    }
+    const penggalangan = await Penggalangan.findById(id);
+
+    if (!penggalangan) {
+      return res.status(404).send({ message: `Penggalangan with id=${id} not found.` });
+    }
+    penggalangan.is_verif = is_verif;    
+    const updatedPenggalangan = await penggalangan.save();    
+    res.status(200).send({
+      message: "Penggalangan verification status updated successfully!",
+      data: updatedPenggalangan
+    });
+
+  } catch (err) {
+    console.error("Error updating verification status:", err);
+    res.status(500).send({
+      message: `Error updating verification status for penggalangan with id=${req.body.id}.`
+    });
+  }
+};
+
 module.exports = {
   findAll,
   findOne,
   store,
   deleteOne,
   update,
+  counTotal,
+  updateVerif
 };

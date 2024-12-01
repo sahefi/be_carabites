@@ -13,6 +13,7 @@ const penggalanganCtrl = require("../controllers/penggalangan.ctrl");
 const transaksiCtrl = require("../controllers/transaksi.ctrl");
 const userCtrl = require("../controllers/user.ctrl");
 const transaksiPCtrl = require("../controllers/transaksi_p.ctrl");
+const adminCtrl = require("../controllers/admin.ctrl");
 
 
 let routes = (app) => {
@@ -28,6 +29,7 @@ let routes = (app) => {
     // Rute yang memerlukan autentikasi
     router.get("/auth", authCtrl.findAll);
 
+    router.get("/admin", adminCtrl.getTotalCounts);
     // router.get("/produk/search",  produkCtrl.findByName); // Route baru untuk pencarian berdasarkan nama produk
     router.get("/produk", produkCtrl.findAll);
     router.get("/produk/:id", produkCtrl.findOne);
@@ -38,6 +40,7 @@ let routes = (app) => {
     router.get("/user", userCtrl.findAll);
     router.get("/user/:id", userCtrl.findOne);
     router.post("/user", userCtrl.store);
+    router.put("/user-verif", userCtrl.updateVerif);
     router.put("/user/:id", userCtrl.update);
     router.delete("/user/:id", produkCtrl.deleteOne);
 
@@ -51,10 +54,13 @@ let routes = (app) => {
     router.get("/postingan", postinganCtrl.findAll);
     router.get("/postingan/:id", postinganCtrl.findOne);
     router.post("/postingan", postinganCtrl.store);
+    router.put("/postingan-verif", postinganCtrl.updateVerif);
 
     router.get("/penggalangan", penggalanganCtrl.findAll);
     router.get("/penggalangan/:id", penggalanganCtrl.findOne);
+    router.get("/penggalangan/count/:id", penggalanganCtrl.counTotal);
     router.post("/penggalangan", penggalanganCtrl.store);
+    router.put("/penggalangan-verif", penggalanganCtrl.updateVerif);
     router.delete("/penggalangan/:id", penggalanganCtrl.deleteOne);
     router.put("/penggalangan/:id", penggalanganCtrl.update);
 
@@ -62,7 +68,8 @@ let routes = (app) => {
     router.post("/transaksi", transaksiCtrl.store);
     router.get("/count/:id", transaksiCtrl.countTotalHarga);
 
-    router.get("/transaksi-p", transaksiPCtrl.findAll);    
+    router.get("/transaksi-p", transaksiPCtrl.findAll);
+    router.get("/transaksi-p/count/:id", transaksiPCtrl.counTotal);    
     router.post("/transaksi-p", transaksiPCtrl.store);
     router.delete("/transaksi-p/:id", transaksiPCtrl.deleteOne);
     router.put("/transaksi-p/:id", transaksiPCtrl.update);

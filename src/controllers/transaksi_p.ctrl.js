@@ -5,7 +5,7 @@ const Transaksi = db.transaksi_p;
 const findAll = (req, res) => {
   Transaksi.find()
     .populate("id_user") // Populate user fields
-    .populate("id_produk") // Populate product fields
+    .populate("id_penggalangan") // Populate transaksi fields
     .then((data) => {
       res.send(data);
     })
@@ -20,72 +20,42 @@ const findAll = (req, res) => {
 
 const store = async (req, res) => {
   try {
-    const transactions = req.body; 
-
+  const transactionData = req.body; 
     
-    if (!Array.isArray(transactions) || transactions.length === 0) {
-      return res.status(400).send({ message: "Input should be an array of transactions." });
-    }
+    const { id_user, id_penggalangan, metode_pembayaran, jumlah_penggalangan, nomor_invoice } = transactionData;
 
+    if (!id_user || !id_penggalangan || !metode_pembayaran || !jumlah_penggalangan || !nomor_invoice) {
+      return res.status(400).send({ message: "All fields are required!" });
+    }        
     
-    const createdTransactions = [];
-
-    for (const transactionData of transactions) {
-      const { id_user, id_produk, metode_pembayaran, jumlah_produk, nomor_invoice } = transactionData;
-
-      if (!id_user || !id_produk || !metode_pembayaran || !jumlah_produk || !nomor_invoice) {
-        return res.status(400).send({ message: "All fields are required!" });
-      }
-
-      const product = await Produk.findById(id_produk);
-
-      if (!product) {
-        return res.status(404).send({ message: `Product with ID ${id_produk} not found!` });
-      }
-
-      const total_harga = product.harga * parseInt(jumlah_produk);
-
-      const transaksi_p = new Transaksi({
-        id_user,
-        id_produk,
-        metode_pembayaran,
-        jumlah_produk: parseInt(jumlah_produk),
-        total_harga,
-        nomor_invoice,
-      });
-
-      const savedTransaction = await transaksi_p.save();
-      createdTransactions.push(savedTransaction);
-    }
-
+    const transaksi_p = new Transaksi({
+      id_user,
+      id_penggalangan,
+      metode_pembayaran,
+      jumlah_penggalangan,      
+      nomor_invoice,
+    });
+    
+    const savedTransaction = await transaksi_p.save();    
+    
     res.status(201).send({
-      message: "Successfully created multiple transactions",
-      data: createdTransactions.map((transaction) => ({
-        id_user: transaction.id_user,
-        id_produk: transaction.id_produk,
-        metode_pembayaran: transaction.metode_pembayaran,
-        jumlah_produk: transaction.jumlah_produk,
-        nomor_invoice: transaction.nomor_invoice,
-        total_harga: transaction.total_harga,
-        createdAt: transaction.createdAt,
-        updatedAt: transaction.updatedAt,
-        id: transaction.id,
-      })),
+      message: "Successfully created transaksi",      
     });
   } catch (err) {
     console.error("Error in store function:", err);
     res.status(500).send({
-      message: err.message || "Could not create the transactions.",
+      message: err.message || "Could not create the transaction.",
     });
   }
 };
+
 
 
 const update = async (req, res) => {
   try {
     const {
       id_user,
-      id_produk,
+      id_penggalangan,
       metode_pembayaran,
       jumlah_produk,
       nomor_invoice,
@@ -104,14 +74,14 @@ const update = async (req, res) => {
     }
 
     
-    const product = await Produk.findById(id_produk);
+    const transaksi = await Transaksi.findById(id_produk);
 
-    if (!product) {
+    if (!transaksi) {
       return res.status(404).send({ message: "Product not found!" });
     }
 
     
-    const total_harga = product.harga * parseInt(jumlah_produk);
+    const total_harga = transaksi.harga * parseInt(jumlah_produk);
 
     
     transaksi_p.id_user = id_user;
@@ -150,16 +120,19 @@ const deleteOne = async (req, res) => {
   }
 };
 
-const countTotalHarga = async (req, res) => {
+const counTotal = async (req, res) => {
   try {
     const id_user = req.params.id;
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();  
-    const currentYear = currentDate.getFullYear();
     
     
-    const transactions = await Transaksi.find({ id_user: id_user });
-    console.log(transactions);
+    const transactions = await Transaksi.find()
+      .populate({
+        path: 'id_penggalangan', // Populasi id_penggalangan untuk akses id_user
+        match: { 'id_user': id_user }, // Hanya ambil penggalangan yang memiliki id_user yang sama
+      })
+      .exec();    
+      
     
     if (transactions.length === 0) {
       return res.status(404).send({ message: `No transactions found for user with id=${id_user}` });
@@ -167,29 +140,25 @@ const countTotalHarga = async (req, res) => {
 
     
     const totalHargaAllTime = transactions.reduce((acc, transaction) => {
-      return acc + (Number(transaction.total_harga) || 0); 
+      return acc + (Number(transaction.jumlah_penggalangan) || 0); 
     }, 0);
 
     
-    const filteredTransactions = transactions.filter(transaction => {
-      const transactionDate = new Date(transaction.createdAt); 
-      return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+    const filteredTransactions = transactions.filter(transaction => {      
+      return transaction.id_penggalangan && transaction.id_penggalangan.status === 'active';
     });
-
     
-    const totalHargaThisMonth = filteredTransactions.reduce((acc, transaction) => {
-      return acc + (Number(transaction.total_harga) || 0); 
+    const totalHargaActive = filteredTransactions.reduce((acc, transaction) => {      
+          
+      return acc + (Number(transaction.jumlah_penggalangan) || 0); 
     }, 0);
-
-    const totalTransaksiAllTime = transactions.length;
-    const totalTransaksiThisMonth = filteredTransactions.length;
+    
+    console.log(totalHargaActive);   
 
     
     res.status(200).send({
       totalHargaAllTime,   
-      totalHargaThisMonth, 
-      totalTransaksiAllTime, 
-      totalTransaksiThisMonth, 
+      totalHargaActive,       
       currentDate,
     });
   } catch (err) {
@@ -206,5 +175,5 @@ module.exports = {
   store,
   deleteOne,
   update,
-  countTotalHarga
+  counTotal
 };

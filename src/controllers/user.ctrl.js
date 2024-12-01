@@ -248,6 +248,32 @@ const findByName = async (req, res) => {
   }
 };
 
+const updateVerif = async (req, res) => {
+  try {
+    const { id, is_verif } = req.body; 
+    if (!['0', '1', '2'].includes(is_verif)) {
+      return res.status(400).send({ message: "Invalid value for is_verif. It must be '0', '1', or '2'." });
+    }
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).send({ message: `User with id=${id} not found.` });
+    }
+    user.is_verif = is_verif;    
+    const updatedUser = await user.save();    
+    res.status(200).send({
+      message: "User verification status updated successfully!",
+      data: updatedUser
+    });
+
+  } catch (err) {
+    console.error("Error updating verification status:", err);
+    res.status(500).send({
+      message: `Error updating verification status for user with id=${req.body.id}.`
+    });
+  }
+};
+
 
 module.exports = {
   findAll,
@@ -255,7 +281,6 @@ module.exports = {
   findOne,
   update,
   deleteOne,
-  findByName
-
-
+  findByName,
+  updateVerif
 }

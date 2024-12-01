@@ -10,6 +10,11 @@ module.exports = mongoose => {
         enum: ['Technology', 'Health', 'Business', 'Lifestyle', 'Education'],
         default: 'amal'
       },
+      is_verif: {
+        type: String,
+        enum: ['0', '1', '2'], 
+        default: '0', 
+      },
     },
     { timestamps: true }
   );
